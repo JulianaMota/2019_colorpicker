@@ -49,10 +49,10 @@ function mouseMoved(event) {
   let displacementX = maxMOVEMENT * mouseXratio;
   let displacementY = maxMOVEMENT * mouseYratio;
   ctx.strokeRect(
-    displacementX,
-    displacementY,
-    w - maxMOVEMENT,
-    h - maxMOVEMENT
+    displacementX + maxMOVEMENT,
+    displacementY + maxMOVEMENT,
+    w - 2 * maxMOVEMENT,
+    h - 2 * maxMOVEMENT
   );
 
   //console.log(displacementX, displacementY);
