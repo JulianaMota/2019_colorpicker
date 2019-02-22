@@ -1,13 +1,11 @@
 "use strict";
 let img;
-let canvas = document.getElementById("imageCanvas");
-let ctx = canvas.getContext("2d");
+let canvas = document.getElementById("imageCanvas"); // use query selector instead of by id be consistent
 let canvasZoom = document.getElementById("zoomCanvas");
-let ctxZoom = canvasZoom.getContext("2d");
+let ctxZoom = null;
+const ctx = canvas.getContext("2d"); // use const
 let imageData = null;
 let zoomData = null;
-let x;
-let y;
 const w = canvas.width;
 let data;
 let rgb;
@@ -45,7 +43,7 @@ function init() {
 function draw() {
   //console.log(img);
   ctx.drawImage(img, 0, 0);
-  getImageData();
+  imageData = getImageData(); // change in class
   canvas.addEventListener("mousemove", mouseMoved);
 }
 
@@ -55,15 +53,26 @@ function getImageData() {
   const h = canvas.height;
   imageData = ctx.getImageData(0, 0, w, h);
   data = imageData.data;
-  zoomData = ctx.getImageData(0, 0, 10, 10);
+  createZoomData();
+
+  return ctx.getImageData(0, 0, w, h);
+}
+
+function createZoomData() {
+  ctxZoom = canvasZoom.getContext("2d");
+  zoomData = ctxZoom.createImageData(10, 10);
   console.log(zoomData);
-  //console.log(data);
+}
+
+function showZoomData() {
+  ctxZoom.putImageData(zoomData, 0, 0);
+  console.log(zoomData);
 }
 
 function mouseMoved(event) {
   //console.log(event);
-  x = event.offsetX;
-  y = event.offsetY;
+  const x = event.offsetX; // console log all event objet to see whet is the best to use
+  const y = event.offsetY;
 
   ctx.putImageData(imageData, 0, 0);
 
@@ -72,6 +81,8 @@ function mouseMoved(event) {
 
   //console.log(x, y);
   getpixel(x, y);
+  showZoomData();
+  copyPixels(x, y);
 }
 
 function getpixel(x, y) {
@@ -85,4 +96,26 @@ function getpixel(x, y) {
   rgb = { r, g, b };
   //console.log(rgb);
   showColorInfo(rgb);
+}
+
+function copyPixels(startX, startY) {
+  console.log(ctx);
+  const w = ctxZoom.canvas.width;
+  const imageW = ctx.canvas.width;
+
+  for (let y = 0; y < 10; y++) {
+    for (let x = 0; x < 10; x++) {
+      const pixelIndex = (x + y * w) * 4;
+
+      const imageX = startX + x;
+      const imageY = startY + y;
+
+      const imageIndex = (imageX + imageY * imageW) * 4;
+
+      zoomData.data[pixelIndex + 0] = imageData.data[imageIndex + 0];
+      zoomData.data[pixelIndex + 1] = imageData.data[imageIndex + 1];
+      zoomData.data[pixelIndex + 2] = imageData.data[imageIndex + 2];
+      zoomData.data[pixelIndex + 3] = imageData.data[imageIndex + 3];
+    }
+  }
 }
